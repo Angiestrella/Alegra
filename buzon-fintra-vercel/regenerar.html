@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regenerar análisis · Buzón de Fintra</title>
+<style>
+body{margin:0;background:#F0F9F9;color:#0F172A;font:15px/1.5 Inter,"Helvetica Neue",Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:32px 20px}
+h1{font-size:22px;margin:0 0 6px}
+p{color:#475569;margin:0 0 16px}
+.btn{border:1px solid #1E7B79;background:#1E7B79;color:#fff;border-radius:8px;padding:10px 16px;font:600 15px inherit;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.sec{background:#fff;color:#1E7B79;border-color:#E2E8F0}
+ol{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:12px 16px 12px 40px}
+li{margin:4px 0}
+.ok{color:#1E7B79}.err{color:#C62828}.wait{color:#475569}
+.acciones{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Regenerar los análisis de la bandeja</h1>
+<p>Pasa los 17 comentarios por el sistema (Gemini, prompt versión 2), uno por uno, con una pausa entre cada uno para no superar el límite gratuito. Toma unos minutos. Al terminar, descarga <strong>seed.json</strong> y súbelo a la raíz del repositorio en GitHub.</p>
+<div class="acciones"><button class="btn" id="go">Generar análisis</button><button class="btn sec" id="bajar" disabled>Descargar seed.json</button></div>
+<p id="estado" aria-live="polite"></p>
+<ol id="lista"></ol>
+</main>
+<script>
+const ENTRADAS = [{"id": "T1", "n": "Ticket de la Parte 2", "orden": 17, "fuente": "Ticket de soporte", "pais": "México", "cal": null, "texto": "Cliente de México dice que no le deja emitir facturas desde el celular, le sale un error. Ya le pasó 3 veces. Es urgente porque tiene que facturar hoy. Android creo. Le dije que reinstalara y sigue igual."}, {"id": "C1", "n": "Comentario 1", "orden": 1, "fuente": "Reseña de Google Play", "pais": "México", "cal": 2, "texto": "No me deja emitir la factura, dice error de RFC del receptor pero el RFC está bien. Perdí un cliente hoy."}, {"id": "C2", "n": "Comentario 2", "orden": 2, "fuente": "Reseña de Google Play", "pais": "Colombia", "cal": 1, "texto": "Desde la última actualización la app se cierra sola cuando abro Reportes."}, {"id": "C3", "n": "Comentario 3", "orden": 3, "fuente": "Reseña de Google Play", "pais": "México", "cal": 3, "texto": "Necesito subir mi e.firma desde el celular. Ahorita solo puedo desde la computadora."}, {"id": "C4", "n": "Comentario 4", "orden": 4, "fuente": "Reseña de Google Play", "pais": "República Dominicana", "cal": 1, "texto": "Tardé 10 minutos en cargar el reporte de ventas y no sabía si seguía cargando o se trabó."}, {"id": "C5", "n": "Comentario 5", "orden": 5, "fuente": "Reseña de Google Play", "pais": "España", "cal": 2, "texto": "No encuentro cómo agregar un descuento por línea en la factura. En la web sí se puede."}, {"id": "C6", "n": "Comentario 6", "orden": 6, "fuente": "Reseña de Google Play", "pais": "México", "cal": 1, "texto": "No puedo mandar la factura por WhatsApp, solo por correo, y mis clientes no leen el correo."}, {"id": "C7", "n": "Comentario 7", "orden": 7, "fuente": "Reseña de Google Play", "pais": "Colombia", "cal": 2, "texto": "Al tomar foto de un recibo de compra pide permisos y luego se queda la pantalla en blanco."}, {"id": "C8", "n": "Comentario 8", "orden": 8, "fuente": "Reseña de Google Play", "pais": "México", "cal": 4, "texto": "Está buena, pero me gustaría ver en qué va mi reporte sin quedarme esperando en la pantalla."}, {"id": "C9", "n": "Comentario 9", "orden": 9, "fuente": "Reseña de Google Play", "pais": "Colombia", "cal": 1, "texto": "Actualicé y ya no me abre. Pantalla blanca."}, {"id": "C10", "n": "Comentario 10", "orden": 10, "fuente": "Reseña de Google Play", "pais": "República Dominicana", "cal": 2, "texto": "No puedo imprimir la factura desde el celular en mi impresora térmica."}, {"id": "C11", "n": "Comentario 11", "orden": 11, "fuente": "Reseña de Google Play", "pais": "México", "cal": 2, "texto": "Los botones son muy chiquitos, me equivoco al seleccionar el cliente."}, {"id": "C12", "n": "Comentario 12", "orden": 12, "fuente": "Reseña de Google Play", "pais": "México", "cal": 1, "texto": "Emití una factura y no sé si ya llegó al SAT, no me dice nada. Prefiero volver a la web."}, {"id": "C13", "n": "Comentario 13", "orden": 13, "fuente": "Reseña de Google Play", "pais": "Colombia", "cal": 3, "texto": "Muy lenta la lista de clientes cuando tengo más de 500."}, {"id": "C14", "n": "Comentario 14", "orden": 14, "fuente": "Reseña de Google Play", "pais": "España", "cal": 2, "texto": "Mi contador no puede entrar a mi cuenta desde la app. ¿Cómo le doy acceso?"}, {"id": "C15", "n": "Comentario 15", "orden": 15, "fuente": "Reseña de Google Play", "pais": "República Dominicana", "cal": 1, "texto": "Se cierra al guardar una cotización con más de 10 ítems."}, {"id": "C16", "n": "Comentario 16", "orden": 16, "fuente": "Reseña de Google Play", "pais": "Colombia", "cal": 5, "texto": "Excelente para cobrar en la calle. Ojalá agreguen registrar pagos recibidos."}];
+const res = {};
+const lista = document.getElementById("lista"), estado = document.getElementById("estado"), go = document.getElementById("go"), bajar = document.getElementById("bajar");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function pintar(){
+  lista.innerHTML = ENTRADAS.map(e => {
+    const r = res[e.id];
+    const st = !r ? '<span class="wait">pendiente</span>' : r.ok ? `<span class="ok">listo: ${esc(r.a.tipo)}, ${esc(r.a.tema)}, ${esc(r.a.severidad)}</span>` : r.cargando ? '<span class="wait">analizando…</span>' : `<span class="err">falló: ${esc(r.error)}</span>`;
+    return `<li>${esc(e.n)}: ${st}</li>`;
+  }).join("");
+}
+const pausa = ms => new Promise(r => setTimeout(r, ms));
+async function analizar(e){
+  for (let intento = 1; intento <= 3; intento++) {
+    const r = await fetch("/api/analyze", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({fuente:e.fuente, pais:e.pais, calificacion:e.cal, comentario:e.texto})});
+    const j = await r.json().catch(() => null);
+    if (r.ok && j) return {ok:true, a:j};
+    if (r.status === 429 && intento < 3) { estado.textContent = "Límite de Gemini alcanzado; espero 40 segundos y sigo…"; await pausa(40000); continue; }
+    return {ok:false, error: (j && j.error) || ("error " + r.status)};
+  }
+}
+go.addEventListener("click", async () => {
+  go.disabled = true; bajar.disabled = true;
+  const pendientes = ENTRADAS.filter(e => !(res[e.id] && res[e.id].ok));
+  for (let i = 0; i < pendientes.length; i++) {
+    const e = pendientes[i];
+    res[e.id] = {cargando:true}; pintar();
+    estado.textContent = `Analizando ${i + 1} de ${pendientes.length}…`;
+    try { res[e.id] = await analizar(e); } catch (err) { res[e.id] = {ok:false, error:"sin conexión"}; }
+    pintar();
+    if (i < pendientes.length - 1) await pausa(5000);
+  }
+  const fallos = ENTRADAS.filter(e => !res[e.id].ok).length;
+  estado.textContent = fallos ? `Terminó con ${fallos} fallo(s). Toca "Generar análisis" otra vez para reintentar solo esos.` : "Listo: los 17 comentarios tienen análisis. Descarga seed.json.";
+  go.textContent = fallos ? "Reintentar los que fallaron" : "Generar análisis";
+  go.disabled = false; bajar.disabled = fallos > 0;
+});
+bajar.addEventListener("click", () => {
+  const datos = ENTRADAS.map(e => Object.assign({}, e, {a: res[e.id].a}));
+  const url = URL.createObjectURL(new Blob([JSON.stringify(datos, null, 1)], {type:"application/json"}));
+  const a = document.createElement("a"); a.href = url; a.download = "seed.json"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+});
+pintar();
+</script>
+</body>
+</html>
