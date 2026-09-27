@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fintra · Buzón de producto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F9F9; --surface:#FFFFFF; --surface-2:#F6FBFB; --ink:#0F172A; --muted:#475569; --line:#E2E8F0;
+  --primary:#30ABA9; --primary-dark:#1E7B79; --primary-soft:#E4F5F4; --on-primary:#FFFFFF;
+  --side:#FFFFFF;
+  --red:#C62828; --red-soft:#FDECEC; --orange:#C2410C; --orange-soft:#FFF1E7; --amber:#8A5406; --amber-soft:#FEF6DD;
+  --blue:#2F5E8C; --blue-soft:#E7F0F9; --gray:#475569; --gray-soft:#F1F5F9;
+  --font:"Inter", "Helvetica Neue", Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151C; --surface:#161E27; --surface-2:#1B2530; --ink:#E6EDF3; --muted:#94A3B8; --line:#273341;
+    --primary:#3CC4C1; --primary-dark:#6ED8D5; --primary-soft:#123A37; --on-primary:#062B28; --side:#131A22;
+    --red:#FF8A80; --red-soft:#3A1B1B; --orange:#FFA673; --orange-soft:#3A2416; --amber:#F2C255; --amber-soft:#352B12;
+    --blue:#90B8E0; --blue-soft:#1A2A3B; --gray:#94A3B8; --gray-soft:#1F2933;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#161E27; --surface-2:#1B2530; --ink:#E6EDF3; --muted:#94A3B8; --line:#273341;
+  --primary:#3CC4C1; --primary-dark:#6ED8D5; --primary-soft:#123A37; --on-primary:#062B28; --side:#131A22;
+  --red:#FF8A80; --red-soft:#3A1B1B; --orange:#FFA673; --orange-soft:#3A2416; --amber:#F2C255; --amber-soft:#352B12;
+  --blue:#90B8E0; --blue-soft:#1A2A3B; --gray:#94A3B8; --gray-soft:#1F2933;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:6px}
+h1,h2,h3,h4,p{margin:0}
+ul,ol{margin:0;padding-left:1.2em}
+li+li{margin-top:.35em}
+
+/* Estructura */
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+.side{background:var(--side);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.marca{display:flex;align-items:center;gap:10px;padding:0 8px}
+.marca .iso{width:32px;height:32px;border-radius:8px;background:#00E0C7;color:#0F172A;display:grid;place-items:center;font-weight:700}
+.marca b{display:block;font-size:16px}
+.marca span{font-size:12.5px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav button{display:flex;justify-content:space-between;align-items:center;border:0;background:none;text-align:left;padding:9px 12px;border-radius:8px;color:var(--muted);font-weight:500}
+.nav button:hover{background:var(--surface-2);color:var(--ink)}
+.nav button[aria-current="page"]{background:var(--primary-soft);color:var(--primary-dark)}
+.nav .cuenta{font-size:12px;background:var(--surface-2);border-radius:999px;padding:1px 8px;color:var(--muted)}
+.side .demo{margin-top:auto;font-size:12px;color:var(--muted);padding:10px 12px;border-radius:8px;background:var(--surface-2)}
+
+.main{padding:26px 32px 48px;min-width:0}
+.cabecera{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:22px}
+.cabecera h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.cabecera p{color:var(--muted);margin-top:4px;max-width:640px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary-dark);background:var(--primary-dark);color:var(--on-primary);border-radius:8px;padding:8px 14px;font-weight:600;white-space:nowrap}
+.btn:hover{filter:brightness(.9)}
+.btn.sec{background:var(--surface);color:var(--primary-dark);border-color:var(--line)}
+.btn.sec:hover{border-color:var(--primary)}
+.btn:disabled{opacity:.55;cursor:default}
+
+/* Resumen */
+.resumen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.dato{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.dato .k{color:var(--muted);font-size:13px}
+.dato .v{font-size:24px;font-weight:700;margin-top:2px}
+.dato .s{font-size:12.5px;color:var(--muted)}
+
+/* Tabla */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.barra-filtros{display:flex;flex-wrap:wrap;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.barra-filtros input,.barra-filtros select,.form select,.form textarea,.revision select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.barra-filtros input{flex:2 1 220px}
+.barra-filtros select{flex:1 1 150px}
+table{width:100%;border-collapse:collapse}
+th{font-size:12.5px;font-weight:600;color:var(--muted);text-align:left;padding:10px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:0}
+.celda-txt button{all:unset;cursor:pointer;display:block}
+.celda-txt button:focus-visible{outline:2px solid var(--primary);outline-offset:3px;border-radius:4px}
+.celda-txt .t{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:520px}
+.celda-txt .o{font-size:12.5px;color:var(--muted);margin-top:3px}
+.vacio{padding:36px 20px;text-align:center;color:var(--muted)}
+
+/* Etiquetas */
+.tag{display:inline-block;font-size:12px;font-weight:500;padding:2px 9px;border-radius:999px;white-space:nowrap;background:var(--gray-soft);color:var(--gray)}
+.g-s5{background:var(--red-soft);color:var(--red)}
+.g-s4{background:var(--orange-soft);color:var(--orange)}
+.g-s3{background:var(--amber-soft);color:var(--amber)}
+.g-s2{background:var(--blue-soft);color:var(--blue)}
+.g-s1{background:var(--gray-soft);color:var(--gray)}
+.e-rev{background:var(--primary-soft);color:var(--primary-dark)}
+.e-atn{background:var(--amber-soft);color:var(--amber)}
+.e-pen{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.tipo{font-size:13px}
+
+/* Prioridades */
+.aviso-prio{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:12px 14px;color:var(--muted);margin-bottom:16px;max-width:820px}
+.prio{display:flex;flex-direction:column;gap:10px}
+.fila-prio{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 14px;align-items:start}
+.fila-prio.top{border-color:var(--primary)}
+.pos{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--surface-2);color:var(--muted)}
+.fila-prio.top .pos{background:var(--primary-dark);color:var(--on-primary)}
+.fila-prio h3{font-size:15.5px;font-weight:600}
+.fila-prio .porque{color:var(--muted);margin-top:3px}
+.fila-prio .lado{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.sello{font-size:12px;font-weight:600;color:var(--primary-dark)}
+.fila-prio details{grid-column:2 / 4;margin-top:8px}
+.fila-prio summary{cursor:pointer;color:var(--primary-dark);font-weight:500;font-size:13.5px}
+.casos{list-style:none;padding:0;margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.casos li+li{margin-top:0}
+.casos button{width:100%;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;gap:12px}
+.casos button:hover{border-color:var(--primary)}
+.subt{font-size:14px;font-weight:600;margin:22px 0 10px;color:var(--muted)}
+
+/* Formulario */
+.form{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 22px;max-width:760px}
+.form .fila{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500}
+.form textarea{min-height:140px;resize:vertical;line-height:1.5;margin-top:0}
+.form .campo{margin-top:14px}
+.err{color:var(--red);font-size:13px;min-height:1.2em;margin-top:6px}
+.acciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.nota{font-size:12.5px;color:var(--muted)}
+.resultado{margin-top:14px;max-width:760px;border-radius:12px;padding:14px 16px;border:1px solid var(--line);background:var(--surface)}
+.resultado.cargando{border-color:var(--primary)}
+.resultado.error{border-color:var(--red);background:var(--red-soft)}
+.resultado.listo{border-color:var(--primary);background:var(--primary-soft)}
+.resultado strong{display:block;margin-bottom:2px}
+.progreso{height:4px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:10px}
+.progreso i{display:block;height:100%;width:30%;background:var(--primary);border-radius:4px}
+@media (prefers-reduced-motion: no-preference){ .progreso i{animation:ida 1.2s ease-in-out infinite alternate} }
+@keyframes ida{from{transform:translateX(-10%)}to{transform:translateX(240%)}}
+.enlace{border:0;background:none;padding:0;color:var(--primary-dark);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+
+/* Panel de detalle */
+.fondo{position:fixed;inset:0;background:rgba(15,23,42,.38);display:flex;justify-content:flex-end;z-index:20}
+.fondo[hidden]{display:none}
+.panel-det{background:var(--surface);width:min(620px,100%);height:100%;overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 24px calc(env(safe-area-inset-bottom,0px) + 28px);box-shadow:-8px 0 24px rgba(15,23,42,.12)}
+.det-top{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+.cerrar{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px;color:var(--ink)}
+.det-titulo{font-size:19px;font-weight:700;line-height:1.3;margin:10px 0 10px}
+.etiquetas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.cita{background:var(--surface-2);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:12px 14px}
+.cita .o{font-size:12.5px;color:var(--muted);margin-top:6px}
+.alerta{margin-top:12px;background:var(--amber-soft);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.sec-det{margin-top:22px}
+.sec-det>h3{font-size:14.5px;font-weight:700;margin-bottom:8px}
+.sec-det .ayuda{color:var(--muted);font-size:13px;margin:-4px 0 8px}
+.caja{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.caja-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.caja-head b{font-size:15px;line-height:1.35}
+.entorno{list-style:none;padding:0;margin:0 0 12px;display:flex;flex-direction:column;gap:6px}
+.entorno li{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding-bottom:6px;border-bottom:1px dashed var(--line)}
+.entorno li+li{margin-top:0}
+.ent-ok{background:var(--primary-soft);color:var(--primary-dark)}
+.ent-sup{background:var(--amber-soft);color:var(--amber)}
+.ent-no{background:var(--gray-soft);color:var(--gray)}
+.mini-t{font-size:12.5px;color:var(--muted);font-weight:600;margin:10px 0 4px}
+.par{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.par>div{background:var(--surface-2);border-radius:8px;padding:10px 12px;font-size:13.5px}
+details.mas{margin-top:22px;border:1px solid var(--line);border-radius:10px;padding:0 16px}
+details.mas summary{cursor:pointer;padding:12px 0;font-weight:600}
+details.mas .dentro{padding-bottom:14px;display:flex;flex-direction:column;gap:14px}
+details.mas h4{font-size:13px;font-weight:600;margin-bottom:4px}
+details.mas .nada{color:var(--muted);font-size:13.5px}
+.revision{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;background:var(--surface-2);border-radius:10px;padding:12px 14px}
+.check{display:flex;align-items:center;gap:8px}
+.check input{width:18px;height:18px;accent-color:var(--primary)}
+.revision .sel{display:flex;flex-direction:column;gap:3px;min-width:220px;flex:1;font-size:12.5px;color:var(--muted)}
+
+/* Responsive */
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;justify-content:space-between;padding:10px 14px;gap:10px;z-index:10;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto}
+  .marca span,.side .demo{display:none}
+  .nav{flex-direction:row}
+  .nav .cuenta{display:none}
+  .main{padding:20px 16px 40px}
+}
+@media (max-width:700px){
+  .resumen{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .dato{padding:10px 12px}.dato .v{font-size:20px}.dato .s{display:none}
+  thead{display:none}
+  table,tbody,tr,td{display:block;width:100%}
+  tbody tr{padding:12px 14px;border-bottom:1px solid var(--line)}
+  td{padding:0;border:0}
+  td+td{display:inline-block;width:auto;margin:8px 6px 0 0}
+  td.col-tipo{display:none}
+  .form .fila,.par{grid-template-columns:1fr}
+  .fila-prio{grid-template-columns:32px minmax(0,1fr)}
+  .fila-prio .lado{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  .fila-prio details{grid-column:1 / 3}
+  .panel-det{padding-left:16px;padding-right:16px}
+  .marca b{font-size:15px}
+  .nav button{padding:8px 10px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="marca"><div class="iso" aria-hidden="true">F</div><div><b>Fintra</b><span>Buzón de producto</span></div></div>
+    <nav class="nav" aria-label="Secciones">
+      <button data-view="bandeja" aria-current="page">Bandeja <span class="cuenta" id="c-bandeja"></span></button>
+      <button data-view="prioridades">Prioridades</button>
+      <button data-view="analizar">Analizar comentario</button>
+    </nav>
+    <p class="demo">Demo: las fuentes están simuladas y los análisis precargados son preliminares.</p>
+  </aside>
+
+  <main class="main">
+    <section id="v-bandeja">
+      <div class="cabecera">
+        <div><h1>Bandeja</h1><p>Todo lo que llega de Google Play, soporte y sesiones con clientes, ya clasificado. Toca un comentario para ver su análisis.</p></div>
+        <button class="btn" data-go="analizar">Analizar comentario</button>
+      </div>
+      <div class="resumen" id="resumen"></div>
+      <div class="panel">
+        <div class="barra-filtros">
+          <input type="search" id="f-buscar" placeholder="Buscar en los comentarios" aria-label="Buscar en los comentarios">
+          <select id="f-tema" aria-label="Tema"></select>
+          <select id="f-tipo" aria-label="Tipo"></select>
+          <select id="f-pais" aria-label="País"></select>
+        </div>
+        <table>
+          <thead><tr><th>Comentario</th><th>Tipo</th><th>Tema</th><th>Gravedad</th><th>Estado</th></tr></thead>
+          <tbody id="filas"></tbody>
+        </table>
+        <div id="sin-filas"></div>
+      </div>
+    </section>
+
+    <section id="v-prioridades" hidden>
+      <div class="cabecera">
+        <div><h1>Prioridades</h1><p>Temas ordenados por su caso más grave y, después, por cantidad de casos. Es una propuesta: la decisión es de la PM.</p></div>
+      </div>
+      <p class="aviso-prio">Esta propuesta solo ve lo que llega al buzón. No incluye datos de uso, como cuántas personas logran emitir una factura, ni cuántos usuarios hay detrás de cada comentario. Con esa información el orden puede cambiar.</p>
+      <div id="prio"></div>
+    </section>
+
+    <section id="v-analizar" hidden>
+      <div class="cabecera">
+        <div><h1>Analizar comentario</h1><p>Pega un comentario tal como llegó. El sistema lo clasifica y, si es un bug, arma el reporte para desarrollo. Después aparece en la bandeja.</p></div>
+      </div>
+      <form class="form" id="form" novalidate>
+        <div class="fila">
+          <label>Fuente<select id="n-fuente"><option>Reseña de Google Play</option><option>Ticket de soporte</option><option>Sesión con cliente</option></select></label>
+          <label>País<select id="n-pais"><option>México</option><option>Colombia</option><option>República Dominicana</option><option>España</option><option value="desconocido">No se sabe</option></select></label>
+          <label>Calificación<select id="n-cal"><option value="">Sin calificación</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+        </div>
+        <label class="campo">Comentario<textarea id="n-texto" placeholder="Pega aquí el comentario tal como llegó, sin editarlo."></textarea></label>
+        <div class="err" id="n-err" role="alert"></div>
+        <div class="acciones"><button class="btn" type="submit" id="n-btn">Analizar comentario</button><span class="nota">Toma unos segundos.</span></div>
+      </form>
+      <div id="n-estado" aria-live="polite"></div>
+      <p class="nota" id="n-borrar" style="margin-top:16px"></p>
+    </section>
+  </main>
+</div>
+
+<div class="fondo" id="fondo" hidden>
+  <aside class="panel-det" id="det" role="dialog" aria-modal="true" aria-labelledby="det-titulo" tabindex="-1"></aside>
+</div>
+
+<script>
+const TEMAS = {
+  G1:{nombre:"La app se cae o no carga"},
+  G2:{nombre:"Facturar no es confiable"},
+  G3:{nombre:"Lento y sin aviso de progreso"},
+  G4:{nombre:"Cerrar la venta en la calle"},
+  G5:{nombre:"Dificultad al armar la factura"},
+  G6:{nombre:"Administrar la cuenta"}
+};
+const SEV = {
+  bloqueo_total:{label:"Bloqueo total", w:5, k:"g-s5"},
+  bloquea_tarea_central:{label:"Bloquea facturar", w:4, k:"g-s4"},
+  bloquea_tarea_secundaria:{label:"Bloquea otra función", w:3, k:"g-s3"},
+  friccion:{label:"Fricción", w:2, k:"g-s2"},
+  deseo:{label:"Deseo", w:1, k:"g-s1"}
+};
+const TIPOS = {bug:"Bug", mejora:"Mejora", funcion_nueva:"Función nueva", pregunta_soporte:"Pregunta"};
+const ANDROID_GP = {campo:"Plataforma", valor:"Android (por ser reseña de Google Play)", estado:"supuesto"};
+
+/* ---------- Entradas precargadas (análisis preliminares) ---------- */
+let SEED = [
+{id:"T1", n:"Ticket de la Parte 2", orden:17, fuente:"Ticket de soporte", pais:"México", cal:null,
+ texto:"Cliente de México dice que no le deja emitir facturas desde el celular, le sale un error. Ya le pasó 3 veces. Es urgente porque tiene que facturar hoy. Android creo. Le dije que reinstalara y sigue igual.",
+ a:{tipo:"bug", tema:"G2", tema_razon:"No puede emitir facturas.", pais:"México",
+  resumen:"Un cliente no logra emitir facturas desde el celular; el error se repitió 3 veces y sigue después de reinstalar.",
+  severidad:"bloquea_tarea_central", severidad_razon:"No puede facturar, que es lo principal que hace la app, y necesita hacerlo hoy.",
+  sabemos:["Soporte reporta que el cliente no puede emitir facturas desde el celular.","Aparece un error; le pasó 3 veces.","Reinstaló la app por indicación de soporte y sigue igual."],
+  suponemos:["Usa Android: soporte escribe “Android creo”."],
+  desconocemos:["El mensaje de error exacto.","Modelo del celular y versión de la app.","Si falla con cualquier cliente o solo con uno.","Si alguno de los intentos generó una factura."],
+  hipotesis:["Una falla al emitir en la versión actual de la app.","Un problema con los datos de un cliente en particular."],
+  necesita_bug_report:true,
+  bug_report:{titulo:"No se puede emitir factura en Android (por confirmar), México; el error persiste tras reinstalar",
+   entorno:[{campo:"País",valor:"México",estado:"confirmado"},{campo:"Plataforma",valor:"Android",estado:"supuesto"},{campo:"Versión de la app",valor:"desconocido",estado:"desconocido"},{campo:"Dispositivo",valor:"desconocido",estado:"desconocido"}],
+   pasos:["Iniciar sesión con una cuenta de México.","Abrir Nueva factura y completarla.","Tocar Emitir."],
+   pasos_nota:"Pasos inferidos del flujo habitual; no reproducido internamente. Ocurrió en 3 de 3 intentos.",
+   esperado:"La factura se emite y la app confirma que quedó emitida.",
+   actual:"Aparece un error y la factura no se emite, según el cliente. Persiste tras reinstalar.",
+   severidad_bug:"alta", severidad_bug_razon:"Impide facturar."},
+  preguntas_soporte:["¿Cuál es el mensaje de error exacto y en qué momento aparece? Idealmente con captura.","¿Qué celular, versión de Android y versión de la app usa? ¿Cuál es el ID de su cuenta?","¿Le falla con cualquier cliente o solo con uno?","¿Puede emitir la misma factura desde la web?","¿Hay otros clientes reportando lo mismo?"],
+  verificaciones_equipo:["Con el ID de cuenta, revisar si alguno de los 3 intentos generó una factura (riesgo de duplicados)."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C1", n:"Comentario 1", orden:1, fuente:"Reseña de Google Play", pais:"México", cal:2,
+ texto:"No me deja emitir la factura, dice error de RFC del receptor pero el RFC está bien. Perdí un cliente hoy.",
+ a:{tipo:"bug", tema:"G2", tema_razon:"No puede emitir una factura.", pais:"México",
+  resumen:"No puede emitir una factura por un error de RFC del receptor que, según el usuario, está bien escrito. Dice que perdió un cliente.",
+  severidad:"bloquea_tarea_central", severidad_razon:"No puede facturar, y reporta que eso le costó un cliente.",
+  sabemos:["Reporta que la app muestra un error de RFC del receptor.","Afirma que el RFC está bien (no verificado).","Dice que perdió un cliente por esto."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["El mensaje de error exacto.","Si falla con cualquier receptor o solo con uno.","Los demás datos fiscales del receptor.","Versión de la app."],
+  hipotesis:["La app podría estar rechazando RFC válidos.","El error podría venir de otro dato fiscal del receptor y el mensaje no lo explica."],
+  necesita_bug_report:true,
+  bug_report:{titulo:"La app rechaza el RFC del receptor y no deja emitir la factura en México",
+   entorno:[{campo:"País",valor:"México",estado:"confirmado"},ANDROID_GP,{campo:"Versión de la app",valor:"desconocido",estado:"desconocido"}],
+   pasos:["Crear una factura en México.","Ingresar el RFC del receptor.","Tocar Emitir."],
+   pasos_nota:"Pasos inferidos del flujo habitual; no reproducido internamente.",
+   esperado:"La factura se emite y la app confirma que quedó emitida.",
+   actual:"Aparece un error de RFC del receptor y la factura no se emite.",
+   severidad_bug:"alta", severidad_bug_razon:"Impide facturar."},
+  preguntas_soporte:["¿Cuál es el mensaje de error exacto? Idealmente con captura.","¿Le pasa con cualquier receptor o solo con uno?","¿Puede emitir esa factura desde la web?","¿Otros usuarios de México reportan lo mismo?"],
+  verificaciones_equipo:["Revisar si aumentaron los rechazos por RFC del receptor en México.","Comparar la validación del RFC en la app y en la web."],
+  confianza:"media", requiere_revision:true}},
+{id:"C2", n:"Comentario 2", orden:2, fuente:"Reseña de Google Play", pais:"Colombia", cal:1,
+ texto:"Desde la última actualización la app se cierra sola cuando abro Reportes.",
+ a:{tipo:"bug", tema:"G1", tema_razon:"La app se cierra al entrar a una sección.", pais:"Colombia",
+  resumen:"La app se cierra al abrir Reportes; el usuario dice que empezó con la última actualización.",
+  severidad:"bloquea_tarea_secundaria", severidad_razon:"No puede usar Reportes; no menciona problemas en el resto de la app.",
+  sabemos:["Reporta que la app se cierra al abrir Reportes.","Dice que empezó después de la última actualización."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Versión de la app.","Si se cierra con cualquier reporte o con uno específico.","Modelo del celular."],
+  hipotesis:["La última versión podría haber introducido una falla en Reportes."],
+  necesita_bug_report:true,
+  bug_report:{titulo:"La app se cierra al abrir Reportes después de actualizar (Colombia)",
+   entorno:[{campo:"País",valor:"Colombia",estado:"confirmado"},ANDROID_GP,{campo:"Versión de la app",valor:"desconocido",estado:"desconocido"}],
+   pasos:["Actualizar la app.","Abrir la app.","Entrar a Reportes."],
+   pasos_nota:"Pasos según el usuario; no reproducido internamente.",
+   esperado:"Reportes se abre y muestra la información.",
+   actual:"La app se cierra sola.",
+   severidad_bug:"media", severidad_bug_razon:"Bloquea una función importante, pero no la facturación."},
+  preguntas_soporte:["¿Qué celular y versión de la app tiene?","¿Se cierra con cualquier reporte o con uno en particular?","¿Puede ver sus reportes desde la web?","¿Otros usuarios reportan cierres en Reportes tras actualizar?"],
+  verificaciones_equipo:["Revisar los cierres registrados en Reportes con la última versión."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C3", n:"Comentario 3", orden:3, fuente:"Reseña de Google Play", pais:"México", cal:3,
+ texto:"Necesito subir mi e.firma desde el celular. Ahorita solo puedo desde la computadora.",
+ a:{tipo:"funcion_nueva", tema:"G6", tema_razon:"Pide gestionar su firma electrónica desde el celular.", pais:"México",
+  resumen:"Quiere subir su e.firma desde el celular; hoy solo puede hacerlo en la computadora.",
+  severidad:"deseo", severidad_razon:"Puede hacerlo hoy desde la computadora; pide hacerlo también en el celular.",
+  sabemos:["Pide subir la e.firma desde el celular.","Dice que hoy solo puede desde la computadora."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Con qué frecuencia necesita hacerlo.","Si otros usuarios lo piden."],
+  hipotesis:[], necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Para qué necesita subir la e.firma desde el celular?","¿Con qué frecuencia lo haría?","¿Otros usuarios lo han pedido?"],
+  verificaciones_equipo:["Evaluar los requisitos de seguridad de manejar la e.firma en el celular."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C4", n:"Comentario 4", orden:4, fuente:"Reseña de Google Play", pais:"República Dominicana", cal:1,
+ texto:"Tardé 10 minutos en cargar el reporte de ventas y no sabía si seguía cargando o se trabó.",
+ a:{tipo:"mejora", tema:"G3", tema_razon:"El reporte tardó mucho y la app no mostró si seguía trabajando.", pais:"República Dominicana",
+  resumen:"El reporte de ventas tardó unos 10 minutos y la app no indicaba si seguía cargando.",
+  severidad:"friccion", severidad_razon:"Esperó mucho sin saber si la app seguía funcionando.",
+  sabemos:["Reporta una espera de 10 minutos.","La app no le indicó si seguía cargando."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si el reporte terminó de cargar.","Cuántas ventas tiene el negocio.","Su conexión a internet."],
+  hipotesis:["Si el reporte nunca terminó de cargar, sería un bug y no solo lentitud."],
+  necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿El reporte terminó de cargar o tuvo que salir?","¿Le pasa cada vez o fue una sola vez?","¿Otros usuarios reportan reportes lentos?"],
+  verificaciones_equipo:["Revisar los tiempos de carga del reporte de ventas."],
+  confianza:"media", requiere_revision:true}},
+{id:"C5", n:"Comentario 5", orden:5, fuente:"Reseña de Google Play", pais:"España", cal:2,
+ texto:"No encuentro cómo agregar un descuento por línea en la factura. En la web sí se puede.",
+ a:{tipo:"mejora", tema:"G5", tema_razon:"No encuentra una opción al armar la factura.", pais:"España",
+  resumen:"No encuentra cómo agregar un descuento por línea en la app; en la web sí puede.",
+  severidad:"friccion", severidad_razon:"Puede hacerlo en la web, pero no en la app.",
+  sabemos:["Dice que no encuentra la opción en la app.","Dice que en la web sí existe."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si la función existe en la app."],
+  hipotesis:["La opción no existe en la app.","Existe, pero es difícil de encontrar."],
+  necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Qué intentó en la app para agregar el descuento?","¿Con qué frecuencia usa descuentos por línea?","¿Otros usuarios preguntan por esto?"],
+  verificaciones_equipo:["Confirmar si el descuento por línea existe en la app."],
+  confianza:"media", requiere_revision:true}},
+{id:"C6", n:"Comentario 6", orden:6, fuente:"Reseña de Google Play", pais:"México", cal:1,
+ texto:"No puedo mandar la factura por WhatsApp, solo por correo, y mis clientes no leen el correo.",
+ a:{tipo:"funcion_nueva", tema:"G4", tema_razon:"Quiere enviar la factura por el canal que usan sus clientes.", pais:"México",
+  resumen:"Solo puede enviar la factura por correo y pide hacerlo por WhatsApp, porque sus clientes no leen el correo.",
+  severidad:"deseo", severidad_razon:"Puede enviarla por correo, aunque sus clientes no lo revisen.",
+  sabemos:["Dice que solo puede enviar la factura por correo.","Dice que sus clientes no leen el correo."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si puede descargar la factura y compartirla por su cuenta.","Cuántos usuarios lo piden."],
+  hipotesis:[], necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Hoy cómo le hace llegar la factura a sus clientes?","¿Con qué frecuencia factura a clientes que no usan el correo?","¿Otros usuarios lo han pedido?"],
+  verificaciones_equipo:["Revisar si la app permite compartir la factura desde el celular."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C7", n:"Comentario 7", orden:7, fuente:"Reseña de Google Play", pais:"Colombia", cal:2,
+ texto:"Al tomar foto de un recibo de compra pide permisos y luego se queda la pantalla en blanco.",
+ a:{tipo:"bug", tema:"G1", tema_razon:"Una pantalla deja de funcionar al fotografiar un recibo.", pais:"Colombia",
+  resumen:"Al fotografiar un recibo de compra, la app pide permisos y luego la pantalla queda en blanco.",
+  severidad:"bloquea_tarea_secundaria", severidad_razon:"No puede registrar recibos con foto; no afecta la facturación.",
+  sabemos:["Reporta que la app pide permisos al tomar la foto.","Después, la pantalla queda en blanco."],
+  suponemos:["Usa Android (por ser reseña de Google Play).","El permiso es de cámara (por la acción de tomar una foto)."],
+  desconocemos:["Si aceptó o rechazó los permisos.","Si pasa siempre.","Versión de la app y celular."],
+  hipotesis:["Una falla al volver del aviso de permisos a la cámara."],
+  necesita_bug_report:true,
+  bug_report:{titulo:"Pantalla en blanco tras pedir permisos al fotografiar un recibo (Colombia)",
+   entorno:[{campo:"País",valor:"Colombia",estado:"confirmado"},ANDROID_GP,{campo:"Versión de la app",valor:"desconocido",estado:"desconocido"}],
+   pasos:["Abrir el registro de un recibo de compra.","Elegir tomar una foto.","Responder al aviso de permisos."],
+   pasos_nota:"Se desconoce si el usuario aceptó o rechazó los permisos.",
+   esperado:"La app abre la cámara para fotografiar el recibo.",
+   actual:"La pantalla queda en blanco.",
+   severidad_bug:"media", severidad_bug_razon:"Bloquea el registro de recibos con foto, no la facturación."},
+  preguntas_soporte:["¿Qué celular, versión de Android y versión de la app usa?","¿Aceptó o rechazó los permisos? ¿Pasa siempre?","¿Puede subir la foto desde la galería o desde la web?","¿Otros usuarios reportan lo mismo?"],
+  verificaciones_equipo:["Reproducir el flujo aceptando y rechazando el permiso de cámara."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C8", n:"Comentario 8", orden:8, fuente:"Reseña de Google Play", pais:"México", cal:4,
+ texto:"Está buena, pero me gustaría ver en qué va mi reporte sin quedarme esperando en la pantalla.",
+ a:{tipo:"mejora", tema:"G3", tema_razon:"Pide ver el avance del reporte mientras carga.", pais:"México",
+  resumen:"Está conforme con la app, pero quiere ver el avance de su reporte sin quedarse esperando en la pantalla.",
+  severidad:"friccion", severidad_razon:"Obtiene el reporte, pero la espera es incómoda.",
+  sabemos:["Califica bien la app.","Pide ver el avance del reporte sin quedarse esperando."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Cuánto tardan sus reportes.","Qué reportes usa."],
+  hipotesis:[], necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Cuánto suele tardar su reporte?","¿Qué reporte usa más?"],
+  verificaciones_equipo:["Revisar qué muestra la app mientras se genera un reporte."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C9", n:"Comentario 9", orden:9, fuente:"Reseña de Google Play", pais:"Colombia", cal:1,
+ texto:"Actualicé y ya no me abre. Pantalla blanca.",
+ a:{tipo:"bug", tema:"G1", tema_razon:"La app no abre.", pais:"Colombia",
+  resumen:"Después de actualizar, la app no abre y queda en pantalla blanca.",
+  severidad:"bloqueo_total", severidad_razon:"No puede usar ninguna parte de la app.",
+  sabemos:["Reporta que actualizó la app.","Dice que la app no abre y queda en pantalla blanca."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Versión de la app y celular.","Si intentó reinstalar.","Si aparece algún mensaje."],
+  hipotesis:["La última versión podría fallar al iniciar en algunos celulares."],
+  necesita_bug_report:true,
+  bug_report:{titulo:"La app no abre y queda en pantalla blanca después de actualizar (Colombia)",
+   entorno:[{campo:"País",valor:"Colombia",estado:"confirmado"},ANDROID_GP,{campo:"Versión de la app",valor:"desconocido",estado:"desconocido"}],
+   pasos:["Actualizar la app.","Abrir la app."],
+   pasos_nota:"Pasos según el usuario; no reproducido internamente.",
+   esperado:"La app abre y muestra la pantalla de inicio.",
+   actual:"La app queda en pantalla blanca y no abre.",
+   severidad_bug:"alta", severidad_bug_razon:"El usuario no puede usar la app en absoluto."},
+  preguntas_soporte:["¿Qué celular y versión de la app tiene?","¿Ya intentó cerrar la app por completo o reinstalarla?","¿Puede usar la web mientras tanto?","¿Otros usuarios reportan lo mismo tras actualizar?"],
+  verificaciones_equipo:["Revisar cierres al iniciar la app con la última versión."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C10", n:"Comentario 10", orden:10, fuente:"Reseña de Google Play", pais:"República Dominicana", cal:2,
+ texto:"No puedo imprimir la factura desde el celular en mi impresora térmica.",
+ a:{tipo:"mejora", tema:"G4", tema_razon:"Quiere entregar la factura impresa a su cliente.", pais:"República Dominicana",
+  resumen:"No logra imprimir la factura desde el celular en su impresora térmica.",
+  severidad:"friccion", severidad_razon:"No puede entregar la factura impresa desde el celular.",
+  sabemos:["Reporta que no puede imprimir desde el celular.","Usa una impresora térmica."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si la función existe en la app.","Marca y modelo de la impresora."],
+  hipotesis:["La app no permite imprimir.","La app imprime, pero no es compatible con su impresora."],
+  necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Qué impresora usa y cómo intenta imprimir?","¿Hoy cómo entrega la factura a sus clientes?","¿Otros usuarios imprimen desde el celular?"],
+  verificaciones_equipo:["Confirmar si la app permite imprimir y con qué impresoras."],
+  confianza:"media", requiere_revision:true}},
+{id:"C11", n:"Comentario 11", orden:11, fuente:"Reseña de Google Play", pais:"México", cal:2,
+ texto:"Los botones son muy chiquitos, me equivoco al seleccionar el cliente.",
+ a:{tipo:"mejora", tema:"G5", tema_razon:"La interfaz causa errores al armar la factura.", pais:"México",
+  resumen:"Los botones son pequeños y a veces elige el cliente equivocado.",
+  severidad:"friccion", severidad_razon:"Puede facturar, pero con riesgo de emitir a un cliente equivocado.",
+  sabemos:["Dice que los botones son muy pequeños.","Dice que se equivoca al seleccionar el cliente."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Tamaño de pantalla de su celular.","Si llegó a emitir facturas al cliente equivocado."],
+  hipotesis:[], necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Qué celular usa?","¿Llegó a emitir alguna factura al cliente equivocado?","¿En qué pantalla le pasa más?"],
+  verificaciones_equipo:["Revisar el tamaño de los elementos en la selección de cliente."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C12", n:"Comentario 12", orden:12, fuente:"Reseña de Google Play", pais:"México", cal:1,
+ texto:"Emití una factura y no sé si ya llegó al SAT, no me dice nada. Prefiero volver a la web.",
+ a:{tipo:"mejora", tema:"G2", tema_razon:"No sabe si su factura quedó válida.", pais:"México",
+  resumen:"Emitió una factura, pero la app no le indicó si llegó al SAT; prefiere volver a la web.",
+  severidad:"friccion", severidad_razon:"Pudo emitir, pero no confía en el resultado y se va a la web.",
+  sabemos:["Dice que emitió una factura.","Dice que la app no le indica si llegó al SAT.","Dice que prefiere volver a la web."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si la app muestra el estado de la factura.","Si la factura quedó registrada."],
+  hipotesis:["La app no muestra el estado ante el SAT.","Lo muestra, pero no es visible."],
+  necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿La factura quedó registrada? Soporte puede revisarlo en su cuenta.","¿Dónde esperaba ver la confirmación?","¿Otros usuarios preguntan si sus facturas llegaron?"],
+  verificaciones_equipo:["Revisar qué muestra la app después de emitir una factura."],
+  confianza:"media", requiere_revision:true}},
+{id:"C13", n:"Comentario 13", orden:13, fuente:"Reseña de Google Play", pais:"Colombia", cal:3,
+ texto:"Muy lenta la lista de clientes cuando tengo más de 500.",
+ a:{tipo:"mejora", tema:"G3", tema_razon:"Una pantalla se vuelve lenta con muchos datos.", pais:"Colombia",
+  resumen:"La lista de clientes se vuelve lenta con más de 500 clientes.",
+  severidad:"friccion", severidad_razon:"Puede usarla, pero con esperas.",
+  sabemos:["Dice que la lista de clientes es muy lenta.","Tiene más de 500 clientes."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Cuánto tarda en cargar.","Si también pasa al buscar un cliente."],
+  hipotesis:[], necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Cuánto tarda en cargar la lista?","¿Le pasa también al buscar un cliente?"],
+  verificaciones_equipo:["Medir la carga de la lista con más de 500 clientes."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C14", n:"Comentario 14", orden:14, fuente:"Reseña de Google Play", pais:"España", cal:2,
+ texto:"Mi contador no puede entrar a mi cuenta desde la app. ¿Cómo le doy acceso?",
+ a:{tipo:"pregunta_soporte", tema:"G6", tema_razon:"Pregunta cómo dar acceso a un tercero.", pais:"España",
+  resumen:"Pregunta cómo darle acceso a su contador desde la app.",
+  severidad:"friccion", severidad_razon:"Su contador no puede entrar a la cuenta.",
+  sabemos:["Pregunta cómo darle acceso a su contador.","Dice que su contador no puede entrar desde la app."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si la función existe en la app.","Si se puede hacer desde la web."],
+  hipotesis:["El acceso de terceros solo existe en la web.","Existe en la app, pero no la encuentra."],
+  necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Qué necesita hacer el contador en la cuenta?","¿Ya intentó darle acceso desde la web?"],
+  verificaciones_equipo:["Confirmar si la app permite invitar a otros usuarios."],
+  confianza:"media", requiere_revision:true}},
+{id:"C15", n:"Comentario 15", orden:15, fuente:"Reseña de Google Play", pais:"República Dominicana", cal:1,
+ texto:"Se cierra al guardar una cotización con más de 10 ítems.",
+ a:{tipo:"bug", tema:"G1", tema_razon:"La app se cierra al guardar.", pais:"República Dominicana",
+  resumen:"La app se cierra al guardar una cotización con más de 10 ítems.",
+  severidad:"bloquea_tarea_secundaria", severidad_razon:"No puede guardar cotizaciones grandes; no afecta la facturación.",
+  sabemos:["Reporta que la app se cierra al guardar una cotización.","Pasa con más de 10 ítems."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Si la cotización se pierde al cerrarse.","Versión de la app."],
+  hipotesis:["Una falla al guardar documentos con muchos ítems."],
+  necesita_bug_report:true,
+  bug_report:{titulo:"La app se cierra al guardar una cotización con más de 10 ítems (Rep. Dominicana)",
+   entorno:[{campo:"País",valor:"República Dominicana",estado:"confirmado"},ANDROID_GP,{campo:"Versión de la app",valor:"desconocido",estado:"desconocido"}],
+   pasos:["Crear una cotización.","Agregar más de 10 ítems.","Tocar Guardar."],
+   pasos_nota:"Pasos según el usuario; no reproducido internamente.",
+   esperado:"La cotización se guarda y la app lo confirma.",
+   actual:"La app se cierra.",
+   severidad_bug:"media", severidad_bug_razon:"Bloquea las cotizaciones grandes, no la facturación."},
+  preguntas_soporte:["¿Qué celular y versión de la app tiene?","¿Le pasa siempre con más de 10 ítems?","¿Puede guardarla desde la web?","¿La cotización se pierde o queda guardada a medias?"],
+  verificaciones_equipo:["Reproducir el guardado con 10, 11 y 20 ítems."],
+  confianza:"alta", requiere_revision:false}},
+{id:"C16", n:"Comentario 16", orden:16, fuente:"Reseña de Google Play", pais:"Colombia", cal:5,
+ texto:"Excelente para cobrar en la calle. Ojalá agreguen registrar pagos recibidos.",
+ a:{tipo:"funcion_nueva", tema:"G4", tema_razon:"Pide registrar cobros, parte de cerrar la venta.", pais:"Colombia",
+  resumen:"Valora la app para cobrar en la calle y pide poder registrar pagos recibidos.",
+  severidad:"deseo", severidad_razon:"Pide algo nuevo; no le impide lo que hace hoy.",
+  sabemos:["Califica la app como excelente para cobrar en la calle.","Pide registrar pagos recibidos."],
+  suponemos:["Usa Android (por ser reseña de Google Play)."],
+  desconocemos:["Qué pagos quiere registrar.","Cómo lleva ese control hoy."],
+  hipotesis:[], necesita_bug_report:false, bug_report:null,
+  preguntas_soporte:["¿Qué quiere registrar: pagos completos, abonos o ambos?","¿Hoy cómo lleva el control de esos pagos?","¿Otros usuarios lo piden?"],
+  verificaciones_equipo:[],
+  confianza:"alta", requiere_revision:false}}
+];
+
+/* Estado */
+const KEY = "buzon-fintra-v1";
+let store = {added:[], reviews:{}};
+try { const p = JSON.parse(localStorage.getItem(KEY) || "null"); if (p) { store.added = Array.isArray(p.added) ? p.added : []; store.reviews = p.reviews && typeof p.reviews === "object" ? p.reviews : {}; } } catch(e) {}
+const guardar = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch(e) {} };
+const f = {buscar:"", tema:"", tipo:"", pais:""};
+let abierto = null, origenFoco = null;
+
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const todas = () => store.added.concat(SEED);
+const temaDe = e => (store.reviews[e.id] && store.reviews[e.id].tema) || e.a.tema;
+const nombreTema = (c, e) => TEMAS[c] ? TEMAS[c].nombre : ((e && e.a.tema_nuevo_nombre) || "Tema nuevo");
+const sevDe = e => SEV[e.a.severidad] || SEV.friccion;
+const pais = p => p === "República Dominicana" ? "Rep. Dominicana" : (p === "desconocido" ? "País sin dato" : p);
+const pl = (n, a, b) => n + " " + (n === 1 ? a : b);
+function estadoDe(e){
+  const r = store.reviews[e.id] || {};
+  if (r.revisado) return {t:"Revisado", k:"e-rev"};
+  if (e.a.requiere_revision) return {t:"Revisar clasificación", k:"e-atn"};
+  return {t:"Pendiente", k:"e-pen"};
+}
+
+/* Bandeja */
+function renderResumen(){
+  const es = todas();
+  const bugs = es.filter(e => e.a.tipo === "bug").length;
+  const rev = es.filter(e => estadoDe(e).k === "e-atn").length;
+  document.getElementById("resumen").innerHTML =
+    `<div class="dato"><div class="k">Comentarios</div><div class="v">${es.length}</div><div class="s">De 3 fuentes y 4 países</div></div>
+     <div class="dato"><div class="k">Bugs para desarrollo</div><div class="v">${bugs}</div><div class="s">Con reporte listo para copiar</div></div>
+     <div class="dato"><div class="k">Por revisar</div><div class="v">${rev}</div><div class="s">Clasificación con dudas</div></div>`;
+  document.getElementById("c-bandeja").textContent = es.length;
+}
+function opts(id, todasTxt, pares, actual){
+  document.getElementById(id).innerHTML = `<option value="">${todasTxt}</option>` + pares.map(([v, t]) => `<option value="${esc(v)}" ${v === actual ? "selected" : ""}>${esc(t)}</option>`).join("");
+}
+function renderFiltros(){
+  const es = todas();
+  opts("f-tema", "Todos los temas", Object.keys(TEMAS).map(c => [c, TEMAS[c].nombre]), f.tema);
+  opts("f-tipo", "Todos los tipos", Object.entries(TIPOS), f.tipo);
+  opts("f-pais", "Todos los países", [...new Set(es.map(e => e.pais))].map(p => [p, pais(p)]), f.pais);
+}
+function visibles(){
+  const q = f.buscar.trim().toLowerCase();
+  return todas().filter(e =>
+    (!f.tema || temaDe(e) === f.tema) && (!f.tipo || e.a.tipo === f.tipo) && (!f.pais || e.pais === f.pais) &&
+    (!q || (e.texto + " " + e.a.resumen).toLowerCase().includes(q))
+  ).sort((x, y) => sevDe(y).w - sevDe(x).w || (y.orden || 0) - (x.orden || 0));
+}
+function renderFilas(){
+  const es = visibles();
+  document.getElementById("filas").innerHTML = es.map(e => {
+    const st = estadoDe(e), s = sevDe(e), t = temaDe(e);
+    return `<tr data-id="${e.id}">
+      <td class="celda-txt"><button data-id="${e.id}"><span class="t">${esc(e.texto)}</span><span class="o">${esc(e.fuente)}, ${esc(pais(e.pais))}${e.cal ? `, ${e.cal} de 5 estrellas` : ""}</span></button></td>
+      <td class="col-tipo tipo">${esc(TIPOS[e.a.tipo] || e.a.tipo)}</td>
+      <td><span class="tag">${esc(nombreTema(t, e))}</span></td>
+      <td><span class="tag ${s.k}">${s.label}</span></td>
+      <td><span class="tag ${st.k}">${st.t}</span></td>
+    </tr>`;
+  }).join("");
+  document.getElementById("sin-filas").innerHTML = es.length ? "" : `<div class="vacio">Ningún comentario coincide con estos filtros. Prueba quitando alguno.</div>`;
+}
+document.getElementById("filas").addEventListener("click", ev => { const tr = ev.target.closest("tr[data-id]"); if (tr) abrir(tr.dataset.id, ev.target.closest("button") || tr); });
+document.getElementById("f-buscar").addEventListener("input", ev => { f.buscar = ev.target.value; renderFilas(); });
+["tema","tipo","pais"].forEach(k => document.getElementById("f-" + k).addEventListener("change", ev => { f[k] = ev.target.value; renderFilas(); }));
+
+/* Detalle */
+const ul = (arr, vacio, ol) => (!arr || !arr.length) ? `<p class="nada">${vacio}</p>` : `<${ol ? "ol" : "ul"}>${arr.map(x => `<li>${esc(x)}</li>`).join("")}</${ol ? "ol" : "ul"}>`;
+const ENT = {confirmado:"ent-ok", supuesto:"ent-sup", desconocido:"ent-no"};
+function textoBug(e){
+  const b = e.a.bug_report, L = [b.titulo, "", "Entorno"];
+  (b.entorno || []).forEach(x => L.push(`- ${x.campo}: ${x.valor} (${x.estado})`));
+  L.push("", "Pasos para reproducir"); (b.pasos || []).forEach((p, i) => L.push(`${i + 1}. ${p}`));
+  if (b.pasos_nota) L.push("Nota: " + b.pasos_nota);
+  L.push("", "Resultado esperado", b.esperado, "", "Resultado actual", b.actual, "", `Severidad: ${b.severidad_bug}. ${b.severidad_bug_razon || ""}`);
+  if ((e.a.preguntas_soporte || []).length) { L.push("", "Preguntas para soporte"); e.a.preguntas_soporte.forEach((p, i) => L.push(`${i + 1}. ${p}`)); }
+  if ((e.a.verificaciones_equipo || []).length) { L.push("", "Lo que debe revisar el equipo"); e.a.verificaciones_equipo.forEach(p => L.push("- " + p)); }
+  L.push("", `Comentario original (${e.fuente}, ${e.pais}):`, `"${e.texto}"`);
+  return L.join("\n");
+}
+function copiar(txt, btn){
+  const ok = () => { const o = btn.textContent; btn.textContent = "Copiado"; setTimeout(() => btn.textContent = o, 1600); };
+  const resp = () => { const t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); ok(); } catch(e) {} t.remove(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, resp); else resp();
+}
+function renderDetalle(){
+  const e = todas().find(x => x.id === abierto); if (!e) return;
+  const a = e.a, s = sevDe(e), t = temaDe(e), r = store.reviews[e.id] || {}, st = estadoDe(e);
+  let h = `<div class="det-top"><span>${esc(e.n)}</span><button class="cerrar" id="cerrar">Cerrar</button></div>
+    <h2 class="det-titulo" id="det-titulo">${esc(a.resumen)}</h2>
+    <div class="etiquetas"><span class="tag ${s.k}">${s.label}</span><span class="tag">${esc(TIPOS[a.tipo] || a.tipo)}</span><span class="tag">${esc(nombreTema(t, e))}</span><span class="tag ${st.k}">${st.t}</span></div>
+    <div class="cita">“${esc(e.texto)}”<div class="o">${esc(e.fuente)}, ${esc(pais(e.pais))}${e.cal ? `, ${e.cal} de 5 estrellas` : ""}</div></div>
+    ${a.confianza !== "alta" ? `<div class="alerta">Revisa esta clasificación: depende de algo que el usuario afirma y nadie ha verificado.</div>` : ""}
+    <div class="sec-det"><h3>Por qué esta gravedad</h3><p>${esc(a.severidad_razon)}</p></div>`;
+  if (a.necesita_bug_report && a.bug_report) {
+    const b = a.bug_report;
+    h += `<div class="sec-det"><h3>Bug report para desarrollo</h3><div class="caja">
+      <div class="caja-head"><b>${esc(b.titulo)}</b><button class="btn" id="copiar">Copiar</button></div>
+      <div class="mini-t">Entorno</div>
+      <ul class="entorno">${(b.entorno || []).map(x => `<li><span>${esc(x.campo)}: ${esc(x.valor)}</span><span class="tag ${ENT[x.estado] || "ent-no"}">${esc(x.estado)}</span></li>`).join("")}</ul>
+      <div class="mini-t">Pasos para reproducir</div>${ul(b.pasos, "Sin pasos.", true)}
+      ${b.pasos_nota ? `<p class="nota" style="margin-top:6px">${esc(b.pasos_nota)}</p>` : ""}
+      <div class="par"><div><div class="mini-t" style="margin-top:0">Resultado esperado</div>${esc(b.esperado)}</div><div><div class="mini-t" style="margin-top:0">Resultado actual</div>${esc(b.actual)}</div></div>
+    </div></div>`;
+  }
+  h += `<div class="sec-det"><h3>Preguntas para soporte</h3>${ul(a.preguntas_soporte, "No hay preguntas pendientes.", true)}</div>
+    <details class="mas"><summary>Ver el análisis completo</summary><div class="dentro">
+      <div><h4>Lo que sabemos</h4>${ul(a.sabemos, "Nada confirmado.")}</div>
+      <div><h4>Lo que suponemos</h4>${ul(a.suponemos, "Ningún supuesto.")}</div>
+      <div><h4>Lo que no sabemos</h4>${ul(a.desconocemos, "Nada pendiente.")}</div>
+      <div><h4>Posibles causas (sin confirmar)</h4>${ul(a.hipotesis, "Sin hipótesis.")}</div>
+      <div><h4>Lo que debe revisar el equipo</h4>${ul(a.verificaciones_equipo, "Nada por ahora.")}</div>
+    </div></details>
+    <div class="sec-det"><h3>Revisión</h3><div class="revision">
+      <label class="check"><input type="checkbox" id="rv-ok" ${r.revisado ? "checked" : ""}> Marcar como revisado</label>
+      <label class="sel">Tema correcto<select id="rv-tema">${Object.keys(TEMAS).map(c => `<option value="${c}" ${c === t ? "selected" : ""}>${esc(TEMAS[c].nombre)}</option>`).join("")}${!TEMAS[t] ? `<option value="${esc(t)}" selected>${esc(nombreTema(t, e))}</option>` : ""}</select></label>
+    </div>${r.tema && r.tema !== a.tema ? `<p class="nota" style="margin-top:6px">Corregido: el sistema lo había puesto en “${esc(nombreTema(a.tema, e))}”.</p>` : ""}</div>`;
+  const d = document.getElementById("det");
+  d.innerHTML = h;
+  document.getElementById("cerrar").addEventListener("click", cerrar);
+  const cp = document.getElementById("copiar"); if (cp) cp.addEventListener("click", () => copiar(textoBug(e), cp));
+  document.getElementById("rv-ok").addEventListener("change", ev => { store.reviews[e.id] = Object.assign({}, store.reviews[e.id], {revisado: ev.target.checked}); guardar(); refrescar(); });
+  document.getElementById("rv-tema").addEventListener("change", ev => { const v = ev.target.value; store.reviews[e.id] = Object.assign({}, store.reviews[e.id], {tema: v === a.tema ? undefined : v}); guardar(); refrescar(); });
+}
+function abrir(id, desde){
+  abierto = id; origenFoco = desde || document.activeElement;
+  document.getElementById("fondo").hidden = false; document.body.style.overflow = "hidden";
+  renderDetalle(); const d = document.getElementById("det"); d.scrollTop = 0; d.focus();
+}
+function cerrar(){
+  abierto = null; document.getElementById("fondo").hidden = true; document.body.style.overflow = "";
+  if (origenFoco && document.body.contains(origenFoco)) origenFoco.focus();
+}
+document.getElementById("fondo").addEventListener("click", ev => { if (ev.target.id === "fondo") cerrar(); });
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && abierto) cerrar(); });
+
+/* Prioridades */
+function ranking(){
+  const es = todas();
+  return Object.keys(TEMAS).map(c => {
+    const xs = es.filter(e => temaDe(e) === c), ws = xs.map(e => sevDe(e).w), max = ws.length ? Math.max(...ws) : 0;
+    return {c, xs, max, peor: Object.values(SEV).find(s => s.w === max), suma: ws.reduce((a, b) => a + b, 0), paises: [...new Set(xs.map(e => e.pais))], fuentes: [...new Set(xs.map(e => e.fuente))]};
+  }).filter(r => r.xs.length).sort((x, y) => y.max - x.max || y.xs.length - x.xs.length || y.suma - x.suma);
+}
+function renderPrio(){
+  const r = ranking();
+  const fila = (t, i) => `<article class="fila-prio ${i < 3 ? "top" : ""}">
+    <div class="pos">${i + 1}</div>
+    <div><h3>${esc(TEMAS[t.c].nombre)}</h3>
+      <p class="porque">${pl(t.xs.length, "caso", "casos")} de ${pl(t.paises.length, "país", "países")}${t.fuentes.length > 1 ? `, llegados por ${t.fuentes.length} fuentes distintas` : ""}. El más grave: ${t.peor.label.toLowerCase()}.</p></div>
+    <div class="lado">${i < 3 ? `<span class="sello">Propuesto para el Sprint Top</span>` : ""}<span class="tag ${t.peor.k}">${t.peor.label}</span></div>
+    <details><summary>Ver ${pl(t.xs.length, "caso", "casos")}</summary><ul class="casos">
+      ${t.xs.sort((x, y) => sevDe(y).w - sevDe(x).w).map(e => `<li><button data-id="${e.id}"><span>${esc(e.a.resumen)}</span><span class="tag ${sevDe(e).k}">${sevDe(e).label}</span></button></li>`).join("")}
+    </ul></details>
+  </article>`;
+  document.getElementById("prio").innerHTML = `<div class="prio">${r.slice(0, 3).map(fila).join("")}</div>` +
+    (r.length > 3 ? `<h2 class="subt">Para después</h2><div class="prio">${r.slice(3).map((t, i) => fila(t, i + 3)).join("")}</div>` : "");
+  document.querySelectorAll("#prio .casos button").forEach(b => b.addEventListener("click", () => abrir(b.dataset.id, b)));
+}
+
+/* Analizar */
+const nTexto = document.getElementById("n-texto"), nErr = document.getElementById("n-err"), nEst = document.getElementById("n-estado"), nBtn = document.getElementById("n-btn");
+nTexto.addEventListener("input", () => nErr.textContent = "");
+const valido = a => a && typeof a === "object" && TIPOS[a.tipo] && SEV[a.severidad] && typeof a.tema === "string" && typeof a.resumen === "string";
+document.getElementById("form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const texto = nTexto.value.trim();
+  if (!texto) { nErr.textContent = "Pega un comentario antes de analizarlo."; nTexto.focus(); return; }
+  if (texto.length > 2000) { nErr.textContent = "El comentario es muy largo. Usa uno de menos de 2.000 caracteres."; nTexto.focus(); return; }
+  const datos = {fuente: document.getElementById("n-fuente").value, pais: document.getElementById("n-pais").value, calificacion: document.getElementById("n-cal").value || null, comentario: texto};
+  nBtn.disabled = true;
+  let seg = 0;
+  const pintar = () => nEst.innerHTML = `<div class="resultado cargando"><strong>Analizando el comentario… ${seg} s</strong>${seg >= 20 ? "Está tardando más de lo normal, pero sigue trabajando." : "Suele tomar entre 5 y 15 segundos."}<div class="progreso"><i></i></div></div>`;
+  pintar(); const reloj = setInterval(() => { seg++; pintar(); }, 1000);
+  const ctrl = new AbortController(), corte = setTimeout(() => ctrl.abort(), 60000);
+  try {
+    const res = await fetch("/api/analyze", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(datos), signal: ctrl.signal});
+    if (res.status === 404) throw {tipo:"sin-servidor"};
+    if (!res.ok) { const j = await res.json().catch(() => null); throw {tipo:"servidor", status: res.status, msg: j && j.error}; }
+    const a = await res.json().catch(() => null);
+    if (!valido(a)) throw {tipo:"formato"};
+    const e = {id:"N" + Date.now(), n:"Comentario nuevo", orden: 1000 + store.added.length, fuente: datos.fuente, pais: datos.pais, cal: datos.calificacion ? Number(datos.calificacion) : null, texto, a, creado: new Date().toISOString()};
+    store.added.unshift(e); guardar(); refrescar();
+    nEst.innerHTML = `<div class="resultado listo"><strong>Listo: ${esc(TIPOS[a.tipo])}, ${esc(SEV[a.severidad].label.toLowerCase())}, en “${esc(nombreTema(a.tema, e))}”.</strong>${esc(a.resumen)}
+      <div class="acciones"><button class="btn" id="ver-nuevo">Ver análisis completo</button><button class="btn sec" id="otro">Analizar otro</button></div></div>`;
+    document.getElementById("ver-nuevo").addEventListener("click", ev2 => abrir(e.id, ev2.currentTarget));
+    document.getElementById("otro").addEventListener("click", () => { nTexto.value = ""; nEst.innerHTML = ""; nTexto.focus(); });
+  } catch (err) {
+    let m;
+    if (err && err.name === "AbortError") m = "El análisis tardó más de un minuto y se canceló. Vuelve a intentarlo.";
+    else if (err && err.tipo === "formato") m = "El sistema respondió en un formato que no se pudo leer. Vuelve a intentarlo.";
+    else if (err && err.tipo === "servidor") m = err.msg || `El servidor de análisis respondió con un error (${err.status}). Vuelve a intentarlo en unos segundos.`;
+    else m = "El análisis en vivo todavía no está conectado en esta vista previa. Se activa cuando la web se publique con su servidor. Mientras tanto, puedes explorar la bandeja y las prioridades.";
+    nEst.innerHTML = `<div class="resultado error"><strong>No se pudo analizar.</strong>${esc(m)}</div>`;
+  } finally { clearInterval(reloj); clearTimeout(corte); nBtn.disabled = false; }
+});
+function renderBorrar(){
+  const b = document.getElementById("n-borrar");
+  if (!store.added.length) { b.innerHTML = ""; return; }
+  b.innerHTML = `Agregaste ${pl(store.added.length, "comentario", "comentarios")} en este navegador. <button class="enlace" id="borrar">Quitarlos</button>`;
+  document.getElementById("borrar").addEventListener("click", () => { store.added.forEach(e => delete store.reviews[e.id]); store.added = []; guardar(); refrescar(); });
+}
+
+/* Navegación */
+function ir(v){
+  document.querySelectorAll(".nav button").forEach(b => { if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  ["bandeja","prioridades","analizar"].forEach(k => document.getElementById("v-" + k).hidden = k !== v);
+  if (v === "prioridades") renderPrio();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => ir(b.dataset.view)));
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => ir(b.dataset.go)));
+function refrescar(){ renderResumen(); renderFiltros(); renderFilas(); renderBorrar(); if (!document.getElementById("v-prioridades").hidden) renderPrio(); if (abierto) renderDetalle(); }
+refrescar();
+/* Si existe seed.json (generado con regenerar.html), la bandeja usa esos análisis reales del sistema */
+fetch("seed.json", {cache:"no-store"}).then(r => r.ok ? r.json() : null).then(d => {
+  if (Array.isArray(d) && d.length && d.every(e => e && e.id && typeof e.texto === "string" && valido(e.a))) {
+    SEED = d;
+    document.querySelector(".side .demo").textContent = "Demo: las fuentes están simuladas. Los análisis los generó el sistema con Gemini.";
+    refrescar();
+  }
+}).catch(() => {});
+</script>
+</body>
+</html>
